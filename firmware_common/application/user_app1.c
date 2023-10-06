@@ -92,6 +92,7 @@ Promises:
 */
 void UserApp1Initialize(void)
 {
+  HEARTBEAT_OFF();
   /* If good initialization, set state to Idle */
   if( 1 )
   {
@@ -140,6 +141,53 @@ State Machine Function Definitions
 /* What does this state do? */
 static void UserApp1SM_Idle(void)
 {
+    static u16 u16Counter = 0;
+    static bool bLightIsOn = FALSE;
+    
+   
+    
+#if 1
+     /* Increment u32Counter every 1ms cycle and check if it's done */
+    u16Counter++;
+    if(u16Counter == U16_COUNTER_PERIOD_MS)
+    {
+      u16Counter = 0;
+      if(bLightIsOn)
+      {
+        HEARTBEAT_OFF();
+        bLightIsOn = FALSE;
+      }
+      else
+      {
+        HEARTBEAT_ON();
+        bLightIsOn = TRUE;
+      }
+    }
+#endif
+    
+   /*
+  Challenge
+    Change the code to automatically double the blink speed every few seconds until you cannot see it blinking anymore, 
+    then slow it back down (or reset back to the 1Hz rate and repeat). 
+    You might also try changing the blinking duty cycle to something other than 50%.
+  */
+#if 0   
+     u16Counter = u16Counter * 2;
+     if(u16Counter == U16_COUNTER_PERIOD_MS)
+    {
+      u16Counter = 0;
+      if(bLightIsOn)
+      {
+        HEARTBEAT_OFF();
+        bLightIsOn = FALSE;
+      }
+      else
+      {
+        HEARTBEAT_ON();
+        bLightIsOn = TRUE;
+      }
+    }
+#endif
     
 } /* end UserApp1SM_Idle() */
      
