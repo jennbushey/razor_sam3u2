@@ -31,7 +31,7 @@ Main Program
 
 void main(void)
 {
-#if 0 /* Set this to 1 to run the example code */
+#if 1/* Set this to 1 to run the example code */
   
   u32 u32UselessVariableForExample;
   u32 au32BigArray[] = {5, 4, 3, 2, 1};
