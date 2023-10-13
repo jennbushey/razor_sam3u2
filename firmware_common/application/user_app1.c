@@ -92,9 +92,21 @@ Promises:
 */
 void UserApp1Initialize(void)
 {
-//#define PART1
+#if 0
+  /* Turn on an LED using the ON function*/
+  LedOn(BLUE);
   
-#ifdef PART // Part 1 of the online exercise
+  /* Turn on an LED using the TOGGLE function */
+  LedToggle(PURPLE);
+  
+  /* Set an LED to blink at 2Hz */
+  LedBlink(RED, LED_2HZ);
+  
+  /* Set an LED to the dimmest state we have (5% duty cycle) */
+  LedPWM(WHITE, LED_PWM_5);
+#endif
+  
+
   /* Initialize all unused LEDs to off */
   LedOff(CYAN);
   LedOff(GREEN);
@@ -110,9 +122,7 @@ void UserApp1Initialize(void)
 
   /* Set an LED to the dimmest state we have (5% duty cycle) */
   LedPWM(WHITE, LED_PWM_5);
-#endif // PART1
-  
-#ifndef PART1
+
   /* All discrete LEDs to off */
   LedOff(WHITE);
   LedOff(PURPLE);
@@ -127,8 +137,6 @@ void UserApp1Initialize(void)
   LedOn(LCD_RED);
   LedOn(LCD_GREEN);
   LedOn(LCD_BLUE);
-
-#endif // !PART
 
   /* If good initialization, set state to Idle */
   if( 1 )
@@ -175,13 +183,25 @@ void UserApp1RunActiveState(void)
 State Machine Function Definitions
 **********************************************************************************************************************/
 /*-------------------------------------------------------------------------------------------------------------------*/
+static void UserApp1SM_Idle(void)
+{
+#if 0
+  /* What does this state do? */
+  static u16 u16BlinkCount = 0;
+  u16 u16BlinkCount = 0;
+  if(u16BlinkCount == 250)  // set to blink every half second (250 ms period)
+  {
+    u16BlinkCount = 0;
+    LedToggle(PURPLE);
+  }
+#endif
+  
 /* 
 Part 1: Manually blink an LED at a hard-coded rate.
 Part 2: Implement a 4-bit counter on the green, yellow, orange and red LEDs 
 Part 3: Change the backlight color every time the counter rolls. 
 */ 
-static void UserApp1SM_Idle(void)
-{
+
   static u16 u16BlinkCount = 0;
   static u8 u8BinaryCounter = 0;
   static u8 u8ColorIndex = 0;
