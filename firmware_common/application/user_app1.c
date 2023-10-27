@@ -150,7 +150,12 @@ State Machine Function Definitions
 static void UserApp1SM_Idle(void)
 {
   static bool bYellowBlink = FALSE;
+ 
+  static LedRateType aeBlinkRate[] = {LED_1HZ, LED_2HZ, LED_4HZ, LED_8HZ};
+  static u8 u8BlinkRateIndex = 0;
+  static bool bLedBlink = FALSE;
   
+  // works
   if( IsButtonPressed(BUTTON0) )
   {
     /* The button is currently pressed, so make sure the LED is on */
@@ -161,28 +166,59 @@ static void UserApp1SM_Idle(void)
     /* The button is not pressed, so make sure the LED is off */
     LedOff(WHITE);
   }
-
   
+  
+  /* Start the YELLOW LED blinking if BUTTON1 was pressed since last check;
+  Turn the YELLOW LED off it was already blinking. */  
+  /* if the LED is off, BUTTON1 starts it blinking at the current rate;
+  If the LED is already on, turn it off. */
   if( WasButtonPressed(BUTTON1) )
   {
     /* Be sure to acknowledge the button press */
     ButtonAcknowledge(BUTTON1);
 
     /* If the LED is already blinking, toggle it off */
-    if(bYellowBlink)
+    if(bLedBlink)
     {
-      bYellowBlink = FALSE;
+      //bYellowBlink = FALSE;
+      bLedBlink = FALSE;
       LedOff(YELLOW);
+      LedOff(PURPLE);
     }
     else
     {
      /* start blinking the LED at the current rate */
-      bYellowBlink = TRUE;
-      LedBlink(YELLOW, LED_1HZ);
+      //bYellowBlink = TRUE;
+      bLedBlink=TRUE;
+      LedBlink(YELLOW, aeBlinkRate[u8BlinkRateIndex]);
+      LedOn(PURPLE);
     }
   }
+ 
+    
+  if( WasButtonPressed(BUTTON2) )
+  {
+    /* Be sure to acknowledge the button press */
+    ButtonAcknowledge(BUTTON2);
+    if(bLedBlink)
+    {
+      LedOff(BLUE);
+      u8BlinkRateIndex++;
+      if(u8BlinkRateIndex == 4)
+      {
+        u8BlinkRateIndex = 0;
+      }
+      /* Request the rate update */
+      LedBlink(YELLOW, aeBlinkRate[u8BlinkRateIndex]);
+    }
+    else{
+      LedOn(BLUE);
+    }
+  } /* END if(WasButtonPressed(BUTTON2))*/
 
-  
+  /* Turn on the CYAN LED if BUTTON3 has been held for 2 seconds. 
+  The LED should turn off once the button is released. */
+  //works
   if( IsButtonHeld(BUTTON3, 2000) )
   {
     LedOn(CYAN);
