@@ -92,6 +92,8 @@ Promises:
 */
 void UserApp1Initialize(void)
 {
+  PWMAudioSetFrequency(BUZZER1, 500);
+
   /* If good initialization, set state to Idle */
   if( 1 )
   {
@@ -140,7 +142,46 @@ State Machine Function Definitions
 /* What does this state do? */
 static void UserApp1SM_Idle(void)
 {
-    
+ /* Check for frequency change*/ 
+  if(WasButtonPressed(BUTTON0))
+  {
+    ButtonAcknowledge(BUTTON0);
+    PWMAudioSetFrequency(BUZZER1, 262);
+  }
+   
+  /* Check for frequency change due to BUTTON1 */
+  if(WasButtonPressed(BUTTON1))
+  {
+    ButtonAcknowledge(BUTTON1);
+    PWMAudioSetFrequency(BUZZER1, 294);
+  }
+  
+  /* Check for frequency change due to BUTTON2 */
+  if(WasButtonPressed(BUTTON2))
+  {
+    ButtonAcknowledge(BUTTON2);
+    PWMAudioSetFrequency(BUZZER1, 330);
+  }
+  
+  /* Check for frequency change due to BUTTON1 */
+  if(WasButtonPressed(BUTTON3))
+  {
+    ButtonAcknowledge(BUTTON3);
+    PWMAudioSetFrequency(BUZZER1, 392);
+  }
+  
+  /* Determine if the tone should be played or not */
+  if(IsButtonPressed(BUTTON0) || IsButtonPressed(BUTTON1) || 
+     IsButtonPressed(BUTTON2) || IsButtonPressed(BUTTON3) )
+  {
+    PWMAudioOn(BUZZER1);
+  }
+  else 
+  {
+    PWMAudioOff(BUZZER1);   
+  }
+
+  
 } /* end UserApp1SM_Idle() */
      
 

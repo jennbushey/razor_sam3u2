@@ -1146,6 +1146,7 @@ strings are invalid.
 */
 void DebugSM_CheckCmd(void)        
 {
+  volatile u32 unused = 10;
   static u8 au8CommandHeader[] = "en+c";
   static u8 au8InvalidCommand[] = "\nInvalid command.  Use en+c##\n\n\r"; 
   bool bGoodCommand = TRUE;
