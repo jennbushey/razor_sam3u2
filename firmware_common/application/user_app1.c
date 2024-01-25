@@ -66,6 +66,8 @@ static fnCode_type UserApp1_pfStateMachine;               /*!< @brief The state 
 // ledpwm(5) // turns on the LED but dimmer
 static u8 au8UserInputBuffer[USER1_INPUT_BUFFER_SIZE]; /* char buffer */
 
+
+
 /**********************************************************************************************************************
 Function Definitions
 **********************************************************************************************************************/
@@ -100,6 +102,7 @@ void UserApp1Initialize(void)
   u8 u8String3[] = " The 'cursor' was here.";
   u32 u32Number = 1234567;
   
+ 
   DebugPrintf(u8String);
   DebugPrintf(u8String2);
   DebugPrintNumber(u32Number);
@@ -162,18 +165,21 @@ static void UserApp1SM_Idle(void)
   static u8 u8NumCharsMessage[] = "\n\rCharacters in buffer: ";
   static u8 u8BufferMessage[] = "\n\rBuffer contents:\n\r";
   u8 u8CharCount;
-  
+    
   /* Print message with number of characters in scanf buffer*/
-#if 0
+#if 1
   if(WasButtonPressed(BUTTON0)){
-  ButtonAcknowledge(BUTTON0);
-  DebugPrintf(u8NumCharsMessage);
-  DebugPrintNumber(G_u8DebugScanfCharCount);
-  DebugLineFeed();
+    ButtonAcknowledge(BUTTON0);
+    DebugPrintf(u8NumCharsMessage);
+    DebugPrintNumber(G_u8DebugScanfCharCount);
+    DebugLineFeed();
   }
 #endif
   
-  if(WasButtonPressed(BUTTON1)){
+  /* Read the input characters to a buffer and print the contents */ 
+#if 1
+  if(WasButtonPressed(BUTTON1))
+  {
     ButtonAcknowledge(BUTTON1);
     
     /* Read the buffer */
@@ -185,8 +191,43 @@ static void UserApp1SM_Idle(void)
     DebugPrintf(au8UserInputBuffer);
     DebugLineFeed();
   }
+#endif
+  
+  /* Module exercise part 1 */
+# if 1
+    if (WasButtonPressed(BUTTON2))
+{
+    ButtonAcknowledge(BUTTON2);
+    
+    /* Module exercise part 1 */
+    u8 u8Name[] = "Jenn";
+    u32 u32NameCount = 0;
+    
+    /* Count occurrences of your name */
+    size_t len = strlen((const char *)u8Name);
+    size_t bufLen = strlen((const char *)au8UserInputBuffer);
+
+    for (int i = 0; i <= bufLen - len; i++) {
+        if (strncmp((const char *)&au8UserInputBuffer[i], (const char *)u8Name, len) == 0) {
+            u32NameCount++;
+            i += len-1; // Move the index past the matched substring
+        } else {
+            i++;
+        }
+    }
+    DebugLineFeed();
+    DebugPrintf("Your name detected! Count: ");
+    DebugPrintNumber(u32NameCount);
+    DebugLineFeed();
+}
+
+#endif
+  
+  
+  
 } /* end UserApp1SM_Idle() */
      
+
 
 /*-------------------------------------------------------------------------------------------------------------------*/
 /* Handle an error */
@@ -194,7 +235,6 @@ static void UserApp1SM_Error(void)
 {
   
 } /* end UserApp1SM_Error() */
-
 
 
 

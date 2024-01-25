@@ -1,0 +1,16 @@
+{
+  "workspace": {
+    "path": "${workspaceFolder}\\eie_ascii-01.eww"
+  },
+  "workspaces": {
+    "${workspaceFolder}\\eie_ascii-01.eww": {
+      "configs": {},
+      "selected": {
+        "path": "${workspaceFolder}\\eie_ascii-01.ewp"
+      }
+    }
+  },
+  "workbench": {
+    "path": "C:\\Program Files\\IAR Systems\\Embedded Workbench 9.2"
+  }
+}
