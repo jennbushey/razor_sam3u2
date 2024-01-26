@@ -88,15 +88,15 @@
     </CallStackStripe>
     <PlDriver>
         <FirstRun>0</FirstRun>
-        <MemConfigValue>D:\IAR\EWARM_9_40_1\arm\config\debugger\Microchip\ATSAM3U2C.ddf</MemConfigValue>
+        <MemConfigValue>C:\Program Files\IAR Systems\Embedded Workbench 9.2\arm\config\debugger\Microchip\ATSAM3U2C.ddf</MemConfigValue>
     </PlDriver>
     <Registers>
         <regBase0>R0 10</regBase0>
         <regBase1>R11 10</regBase1>
     </Registers>
     <ArmDriver>
-        <EnableCache>0</EnableCache>
         <EnforceMemoryConfiguration>1</EnforceMemoryConfiguration>
+        <EnableCache>0</EnableCache>
     </ArmDriver>
     <struct_types>
         <Fmt0>AntAssignChannelInfoType-AntChannel	3	0</Fmt0>
