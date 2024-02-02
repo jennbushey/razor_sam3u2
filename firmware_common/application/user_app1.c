@@ -93,23 +93,26 @@ Promises:
 - NONE
 
 */
+
+
+
 void UserApp1Initialize(void)
 {
   AntAssignChannelInfoType sChannelInfo;
 
   if(AntRadioStatusChannel(ANT_CHANNEL_0) == ANT_UNCONFIGURED)
   {
-    sChannelInfo.AntChannel = ANT_CHANNEL_0;
+    sChannelInfo.AntChannel = U8_ANT_CHANNEL_USERAPP; //ANT_CHANNEL_0;
     sChannelInfo.AntChannelType = CHANNEL_TYPE_MASTER;
-    sChannelInfo.AntChannelPeriodHi = ANT_CHANNEL_PERIOD_HI_DEFAULT;
-    sChannelInfo.AntChannelPeriodLo = ANT_CHANNEL_PERIOD_LO_DEFAULT;
+    sChannelInfo.AntChannelPeriodHi = U8_ANT_CHANNEL_PERIOD_HI_USERAPP; //ANT_CHANNEL_PERIOD_HI_DEFAULT;
+    sChannelInfo.AntChannelPeriodLo = U8_ANT_CHANNEL_PERIOD_LO_USERAPP; //ANT_CHANNEL_PERIOD_LO_DEFAULT;
     
-    sChannelInfo.AntDeviceIdHi = 0x00;
-    sChannelInfo.AntDeviceIdLo = 0x01;
-    sChannelInfo.AntDeviceType = ANT_DEVICE_TYPE_DEFAULT;
-    sChannelInfo.AntTransmissionType = ANT_TRANSMISSION_TYPE_DEFAULT;
+    sChannelInfo.AntDeviceIdHi = U8_ANT_DEVICE_HI_USERAPP; //0x00;
+    sChannelInfo.AntDeviceIdLo = U8_ANT_DEVICE_LO_USERAPP; //0x01;
+    sChannelInfo.AntDeviceType = U8_ANT_DEVICE_TYPE_USERAPP; // ANT_DEVICE_TYPE_DEFAULT;
+    sChannelInfo.AntTransmissionType = U8_ANT_TRANSMISSION_TYPE_USERAPP; //ANT_TRANSMISSION_TYPE_DEFAULT;
     
-    sChannelInfo.AntFrequency = ANT_FREQUENCY_DEFAULT;
+    sChannelInfo.AntFrequency = U8_ANT_FREQUENCY_USERAPP; // ANT_FREQUENCY_DEFAULT;
     sChannelInfo.AntTxPower = ANT_TX_POWER_DEFAULT;
     
     sChannelInfo.AntNetwork = ANT_NETWORK_DEFAULT;
@@ -177,22 +180,44 @@ static void UserApp1SM_WaitAntReady(void)
     }
     else
     {
-      UserApp1_pfStateMachine = UserApp1SM_Error();
+      UserApp1_pfStateMachine = UserApp1SM_Error;
     }
   }
 }
 
 /* end UserApp1SM_WaitAntReady() */
+
 /*-------------------------------------------------------------------------------------------------------------------*/
 /* Wait for channel to be open */
-static void UserApp1SM_Wait(void)
+static void UserApp1SM_WaitChannelOpen(void)
 {
   if(AntRadioStatusChannel(U8_ANT_CHANNEL_USERAPP) == ANT_OPEN)
   {
     UserApp1_pfStateMachine = UserApp1SM_ChannelOpen;
   }
+  
 }
 /* end UserApp1SM_WaitChannelOpen() */
+
+/*-------------------------------------------------------------------------------------------------------------------*/
+
+/* What does this state do? */
+static void UserApp1SM_ChannelOpen(void)
+{
+  if(AntReadAppMessageBuffer()){
+  /*New data message: check what it is*/
+    if(G_eAntApiCurrentMessageClass == ANT_DATA){
+    /* We get some data */
+    }
+    else if(G_eAntApiCurrentMessageClass== ANT_TICK){
+    /* A channel period has gone by: typically this is when new data should be queued to be sent */
+    }
+  } /* end AntReadData()*/
+  
+} /* end UserApp1SM_ChannelOpen() */
+     
+
+/*-------------------------------------------------------------------------------------------------------------------*/
 
 
 
