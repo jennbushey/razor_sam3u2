@@ -38,6 +38,7 @@ PROTECTED FUNCTIONS
 **********************************************************************************************************************/
 
 #include "configuration.h"
+#include <stdio.h>
 
 /***********************************************************************************************************************
 Global variable definitions with scope across entire project.
@@ -62,7 +63,10 @@ Variable names shall start with "UserApp1_<type>" and be declared as static.
 static fnCode_type UserApp1_pfStateMachine;               /*!< @brief The state machine function pointer */
 //static u32 UserApp1_u32Timeout;                           /*!< @brief Timeout counter used across states */
 
+volatile uint32_t timer_ticks = 0;
+volatile uint8_t timer_running = 0;
 
+// static u8 UserApp_au8MyName[] = "LCD Example";
 /**********************************************************************************************************************
 Function Definitions
 **********************************************************************************************************************/
@@ -92,6 +96,23 @@ Promises:
 */
 void UserApp1Initialize(void)
 {
+  // Initialize LCD Screen
+  u8 au8MessageWelcome[] = "Welcome! Timer Ready";
+  LcdMessage(LINE1_START_ADDR, au8MessageWelcome);
+  
+  // Initialize heartbeat LED
+  HEARTBEAT_OFF();
+  
+  // Initialize LEDs
+  LedOff(WHITE);
+  LedOff(PURPLE);
+  LedOff(BLUE);
+  LedOff(CYAN);
+  LedOff(GREEN);
+  LedOff(YELLOW);
+  LedOff(ORANGE);
+  LedOff(RED);
+  
   /* If good initialization, set state to Idle */
   if( 1 )
   {
@@ -102,7 +123,7 @@ void UserApp1Initialize(void)
     /* The task isn't properly initialized, so shut it down and don't run */
     UserApp1_pfStateMachine = UserApp1SM_Error;
   }
-
+  LcdCommand(LCD_HOME_CMD);
 } /* end UserApp1Initialize() */
 
   
@@ -138,11 +159,149 @@ State Machine Function Definitions
 **********************************************************************************************************************/
 /*-------------------------------------------------------------------------------------------------------------------*/
 /* What does this state do? */
+// LcdMessage(LINE2_START_ADDR, au8Message);
+  //LcdClearChars(LINE1_START_ADDR +13,3);
+  //LcdCommand(LCD_CLEAR_CMD);
+      // LcdCommand(LCD_CLEAR_CMD);
+    // LcdClearChars(LINE1_START_ADDR, "Press BTN3 to START");
+    // LcdMessage(LINE2_START_ADDR, au8Message);
+    //LcdMessage(LINE2_START_ADDR + 10, "*");
+
+// Define a delay function using a loop
+void Delay(uint32_t milliseconds)
+{
+    volatile uint32_t counter = 0;
+    for (uint32_t i = 0; i < milliseconds * 1000; i++)
+    {
+        counter++; // Increment the counter to consume CPU cycles
+    }
+}
+
+void UpdateTime(u8 *au8Time, u8 u8Hour, u8 u8Minute, u8 u8Second)
+{
+    au8Time[0] = (u8Hour / 10) + '0';
+    au8Time[1] = (u8Hour % 10) + '0';
+    au8Time[3] = (u8Minute / 10) + '0';
+    au8Time[4] = (u8Minute % 10) + '0';
+    au8Time[6] = (u8Second / 10) + '0';
+    au8Time[7] = (u8Second % 10) + '0';
+} 
+
 static void UserApp1SM_Idle(void)
 {
+    static u8 au8StartMessage[] = "Press BTN3 to START ";
+    static u8 au8Time[] = "00:00:00             ";
+    static bool bIsCountingDown = FALSE;
+    static u8 u8Hour = 0;
+    static u8 u8Minute = 0;
+    static u8 u8Second = 0;
+    static u16 u16Counter = 0;
+    static bool bLightIsOn = FALSE;  // Variable to hold the heartbeat
+    static bool timerIsOn = FALSE;  // Variable to hold the timer
+
+    //LcdMessage(LINE1_START_ADDR, au8StartMessage);
+      if (IsButtonPressed(BUTTON0))
+      {
+          ButtonAcknowledge(BUTTON0);
+          LedOn(WHITE);
+          LedOff(GREEN);
+          u8Hour++;
+          if (u8Hour > 23)
+          {
+              u8Hour = 0;
+          }
+          UpdateTime(au8Time, u8Hour, u8Minute, u8Second);
+          LcdMessage(LINE1_START_ADDR, au8Time);
+          Delay(100);
+      } else {
+        LedOff(WHITE);
+      }
+  
+
+      if (IsButtonPressed(BUTTON1))
+      {
+          ButtonAcknowledge(BUTTON1);
+          u8Minute++;
+          LedOn(PURPLE);
+          LedOff(GREEN);
+          if (u8Minute > 59)
+          {
+              u8Minute = 0;
+          }
+          UpdateTime(au8Time, u8Hour, u8Minute, u8Second);
+          LcdMessage(LINE1_START_ADDR, au8Time);
+          Delay(100);
+      } else {
+        LedOff(PURPLE);
+      }
+
+      if (IsButtonPressed(BUTTON2))
+      {
+          ButtonAcknowledge(BUTTON2);
+          u8Second++;
+          LedOn(BLUE);
+          LedOff(GREEN);
+          if (u8Second > 59)
+          {
+              u8Second = 0;
+          }
+          UpdateTime(au8Time, u8Hour, u8Minute, u8Second);
+          LcdMessage(LINE1_START_ADDR, au8Time);
+          Delay(100);
+      } else {
+        LedOff(BLUE);
+      }
+
+
+  
+  // Handle Button3 to start the countdown
+  if(IsButtonPressed(BUTTON3))
+  {
+    ButtonAcknowledge(BUTTON3);
+    bIsCountingDown = TRUE;
+  }
     
-} /* end UserApp1SM_Idle() */
-     
+    u16Counter++;
+    if(u16Counter == U16_COUNTER_PERIOD_MS){
+      u16Counter = 0;
+      if(bLightIsOn){
+          HEARTBEAT_OFF();
+          bLightIsOn = FALSE;
+      }
+      else {
+           // HEARTBEAT_ON();
+           bLightIsOn = TRUE;
+           if(bIsCountingDown){
+             HEARTBEAT_ON();
+             // Update the countdown values
+              if (u8Second > 0)
+                u8Second--;
+              else if (u8Minute > 0)
+              {
+                u8Minute--;
+                u8Second = 59;
+              }
+              else if (u8Hour > 0)
+              {
+                u8Hour--;
+                u8Minute = 59;
+                u8Second = 59;
+              }
+             UpdateTime(au8Time, u8Hour, u8Minute, u8Second);
+             LcdMessage(LINE1_START_ADDR, au8Time);
+           }
+      }
+    }
+
+    // Countdown completed, reset the flag
+    if(bIsCountingDown == TRUE && u8Hour == 0 && u8Minute == 0 && u8Second == 0){
+      bIsCountingDown = FALSE;
+      LcdMessage(LINE1_START_ADDR, "   *****DONE!*****       ");
+      LedOn(GREEN);
+      HEARTBEAT_OFF();
+    }
+}
+
 
 /*-------------------------------------------------------------------------------------------------------------------*/
 /* Handle an error */

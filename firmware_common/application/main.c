@@ -28,7 +28,6 @@ const u8 G_aau8AppShortNames[NUMBER_APPLICATIONS][MAX_TASK_NAME_SIZE] =
 {"LED", "BUTTON", "DEBUG", "TIMER", "LCD", "ADC", "ANT", "CAPTOUCH"};
 #endif /* EIE_DOTMATRIX */
 
-
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* External global variables defined in other files (must indicate which file they are defined in) */
 
@@ -132,9 +131,9 @@ void main(void)
     UserApp3RunActiveState();
         
     /* System sleep */
-    HEARTBEAT_OFF();
+    // HEARTBEAT_OFF();
     SystemSleep();
-    HEARTBEAT_ON();
+    // HEARTBEAT_ON();
     
   } /* end while(1) main super loop */
   

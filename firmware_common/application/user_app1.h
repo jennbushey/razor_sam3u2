@@ -37,6 +37,8 @@ Function Declarations
 /*--------------------------------------------------------------------------------------------------------------------*/
 void UserApp1Initialize(void);
 void UserApp1RunActiveState(void);
+void UpdateTime(u8 *au8Time, u8 u8Hour, u8 u8Minute, u8 u8Second);
+void Delay(uint32_t milliseconds);
 
 
 /*------------------------------------------------------------------------------------------------------------------*/
@@ -55,7 +57,8 @@ static void UserApp1SM_Error(void);
 /**********************************************************************************************************************
 Constants / Definitions
 **********************************************************************************************************************/
-
+#define U16_COUNTER_PERIOD_MS (u16)500
+#define MESSAGE_DELAY_MS (u16)100 
 
 #endif /* __USER_APP1_H */
 
