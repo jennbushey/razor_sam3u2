@@ -39,6 +39,7 @@ void UserApp1Initialize(void);
 void UserApp1RunActiveState(void);
 void UpdateTime(u8 *au8Time, u8 u8Hour, u8 u8Minute, u8 u8Second);
 void Delay(uint32_t milliseconds);
+void PlayKitchenBuzzer(void);
 
 
 /*------------------------------------------------------------------------------------------------------------------*/

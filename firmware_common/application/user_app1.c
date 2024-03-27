@@ -5,15 +5,15 @@ should be replaced by something specific to the task.
 
 ----------------------------------------------------------------------------------------------------------------------
 To start a new task using this user_app1 as a template:
- 1. Copy both user_app1.c and user_app1.h to the Application directory
- 2. Rename the files yournewtaskname.c and yournewtaskname.h
- 3. Add yournewtaskname.c and yournewtaskname.h to the Application Include and Source groups in the IAR project
- 4. Use ctrl-h (make sure "Match Case" is checked) to find and replace all instances of "user_app1" with "yournewtaskname"
- 5. Use ctrl-h to find and replace all instances of "UserApp1" with "YourNewTaskName"
- 6. Use ctrl-h to find and replace all instances of "USER_APP1" with "YOUR_NEW_TASK_NAME"
- 7. Add a call to YourNewTaskNameInitialize() in the init section of main
- 8. Add a call to YourNewTaskNameRunActiveState() in the Super Loop section of main
- 9. Update yournewtaskname.h per the instructions at the top of yournewtaskname.h
+1. Copy both user_app1.c and user_app1.h to the Application directory
+2. Rename the files yournewtaskname.c and yournewtaskname.h
+3. Add yournewtaskname.c and yournewtaskname.h to the Application Include and Source groups in the IAR project
+4. Use ctrl-h (make sure "Match Case" is checked) to find and replace all instances of "user_app1" with "yournewtaskname"
+5. Use ctrl-h to find and replace all instances of "UserApp1" with "YourNewTaskName"
+6. Use ctrl-h to find and replace all instances of "USER_APP1" with "YOUR_NEW_TASK_NAME"
+7. Add a call to YourNewTaskNameInitialize() in the init section of main
+8. Add a call to YourNewTaskNameRunActiveState() in the Super Loop section of main
+9. Update yournewtaskname.h per the instructions at the top of yournewtaskname.h
 10. Delete this text (between the dashed lines) and update the Description below to describe your task
 ----------------------------------------------------------------------------------------------------------------------
 
@@ -65,8 +65,15 @@ static fnCode_type UserApp1_pfStateMachine;               /*!< @brief The state 
 
 volatile uint32_t timer_ticks = 0;
 volatile uint8_t timer_running = 0;
+#define BUZZER_DURATION_MS 1000
 
-// static u8 UserApp_au8MyName[] = "LCD Example";
+// Define the frequency for the kitchen buzzer tone (in Hz)
+#define TONE_KITCHEN_BUZZER   1500
+
+// Define the duration for the kitchen buzzer tone (in milliseconds)
+#define DURATION_KITCHEN_BUZZER   3000
+
+
 /**********************************************************************************************************************
 Function Definitions
 **********************************************************************************************************************/
@@ -96,37 +103,40 @@ Promises:
 */
 void UserApp1Initialize(void)
 {
-  // Initialize LCD Screen
-  u8 au8MessageWelcome[] = "Welcome! Timer Ready";
-  LcdMessage(LINE1_START_ADDR, au8MessageWelcome);
-  
-  // Initialize heartbeat LED
-  HEARTBEAT_OFF();
-  
-  // Initialize LEDs
-  LedOff(WHITE);
-  LedOff(PURPLE);
-  LedOff(BLUE);
-  LedOff(CYAN);
-  LedOff(GREEN);
-  LedOff(YELLOW);
-  LedOff(ORANGE);
-  LedOff(RED);
-  
-  /* If good initialization, set state to Idle */
-  if( 1 )
-  {
-    UserApp1_pfStateMachine = UserApp1SM_Idle;
-  }
-  else
-  {
-    /* The task isn't properly initialized, so shut it down and don't run */
-    UserApp1_pfStateMachine = UserApp1SM_Error;
-  }
-  LcdCommand(LCD_HOME_CMD);
+    // Initialize LCD Screen
+    u8 au8MessageWelcome[] = "Welcome! Timer Ready";
+    LcdMessage(LINE1_START_ADDR, au8MessageWelcome);
+    
+    // Initialize Buzzer
+    PWMAudioSetFrequency(BUZZER1, 500);
+    
+    // Initialize heartbeat LED
+    HEARTBEAT_OFF();
+    
+    // Initialize LEDs
+    LedOff(WHITE);
+    LedOff(PURPLE);
+    LedOff(BLUE);
+    LedOff(CYAN);
+    LedOff(GREEN);
+    LedOff(YELLOW);
+    LedOff(ORANGE);
+    LedOff(RED);
+    
+    /* If good initialization, set state to Idle */
+    if( 1 )
+    {
+        UserApp1_pfStateMachine = UserApp1SM_Idle;
+    }
+    else
+    {
+        /* The task isn't properly initialized, so shut it down and don't run */
+        UserApp1_pfStateMachine = UserApp1SM_Error;
+    }
+    LcdCommand(LCD_HOME_CMD);
 } /* end UserApp1Initialize() */
 
-  
+
 /*!----------------------------------------------------------------------------------------------------------------------
 @fn void UserApp1RunActiveState(void)
 
@@ -144,8 +154,8 @@ Promises:
 */
 void UserApp1RunActiveState(void)
 {
-  UserApp1_pfStateMachine();
-
+    UserApp1_pfStateMachine();
+    
 } /* end UserApp1RunActiveState */
 
 
@@ -158,14 +168,6 @@ void UserApp1RunActiveState(void)
 State Machine Function Definitions
 **********************************************************************************************************************/
 /*-------------------------------------------------------------------------------------------------------------------*/
-/* What does this state do? */
-// LcdMessage(LINE2_START_ADDR, au8Message);
-  //LcdClearChars(LINE1_START_ADDR +13,3);
-  //LcdCommand(LCD_CLEAR_CMD);
-      // LcdCommand(LCD_CLEAR_CMD);
-    // LcdClearChars(LINE1_START_ADDR, "Press BTN3 to START");
-    // LcdMessage(LINE2_START_ADDR, au8Message);
-    //LcdMessage(LINE2_START_ADDR + 10, "*");
 
 // Define a delay function using a loop
 void Delay(uint32_t milliseconds)
@@ -187,9 +189,18 @@ void UpdateTime(u8 *au8Time, u8 u8Hour, u8 u8Minute, u8 u8Second)
     au8Time[7] = (u8Second % 10) + '0';
 } 
 
+// Function to play the kitchen buzzer tone
+void PlayKitchenBuzzer(void)
+{
+    PWMAudioSetFrequency(BUZZER1, TONE_KITCHEN_BUZZER);
+    PWMAudioOn(BUZZER1);
+    Delay(DURATION_KITCHEN_BUZZER);
+    PWMAudioOff(BUZZER1);
+}
+
+
 static void UserApp1SM_Idle(void)
 {
-    static u8 au8StartMessage[] = "Press BTN3 to START ";
     static u8 au8Time[] = "00:00:00             ";
     static bool bIsCountingDown = FALSE;
     static u8 u8Hour = 0;
@@ -197,108 +208,121 @@ static void UserApp1SM_Idle(void)
     static u8 u8Second = 0;
     static u16 u16Counter = 0;
     static bool bLightIsOn = FALSE;  // Variable to hold the heartbeat
-    static bool timerIsOn = FALSE;  // Variable to hold the timer
-
-    //LcdMessage(LINE1_START_ADDR, au8StartMessage);
-      if (IsButtonPressed(BUTTON0))
-      {
-          ButtonAcknowledge(BUTTON0);
-          LedOn(WHITE);
-          LedOff(GREEN);
-          u8Hour++;
-          if (u8Hour > 23)
-          {
-              u8Hour = 0;
-          }
-          UpdateTime(au8Time, u8Hour, u8Minute, u8Second);
-          LcdMessage(LINE1_START_ADDR, au8Time);
-          Delay(100);
-      } else {
-        LedOff(WHITE);
-      }
-  
-
-      if (IsButtonPressed(BUTTON1))
-      {
-          ButtonAcknowledge(BUTTON1);
-          u8Minute++;
-          LedOn(PURPLE);
-          LedOff(GREEN);
-          if (u8Minute > 59)
-          {
-              u8Minute = 0;
-          }
-          UpdateTime(au8Time, u8Hour, u8Minute, u8Second);
-          LcdMessage(LINE1_START_ADDR, au8Time);
-          Delay(100);
-      } else {
-        LedOff(PURPLE);
-      }
-
-      if (IsButtonPressed(BUTTON2))
-      {
-          ButtonAcknowledge(BUTTON2);
-          u8Second++;
-          LedOn(BLUE);
-          LedOff(GREEN);
-          if (u8Second > 59)
-          {
-              u8Second = 0;
-          }
-          UpdateTime(au8Time, u8Hour, u8Minute, u8Second);
-          LcdMessage(LINE1_START_ADDR, au8Time);
-          Delay(100);
-      } else {
-        LedOff(BLUE);
-      }
-
-
-  
-  // Handle Button3 to start the countdown
-  if(IsButtonPressed(BUTTON3))
-  {
-    ButtonAcknowledge(BUTTON3);
-    bIsCountingDown = TRUE;
-  }
     
+   
+    // Keep track of the loop
     u16Counter++;
-    if(u16Counter == U16_COUNTER_PERIOD_MS){
-      u16Counter = 0;
-      if(bLightIsOn){
-          HEARTBEAT_OFF();
-          bLightIsOn = FALSE;
-      }
-      else {
-           // HEARTBEAT_ON();
-           bLightIsOn = TRUE;
-           if(bIsCountingDown){
-             HEARTBEAT_ON();
-             // Update the countdown values
-              if (u8Second > 0)
-                u8Second--;
-              else if (u8Minute > 0)
-              {
-                u8Minute--;
-                u8Second = 59;
-              }
-              else if (u8Hour > 0)
-              {
-                u8Hour--;
-                u8Minute = 59;
-                u8Second = 59;
-              }
-             UpdateTime(au8Time, u8Hour, u8Minute, u8Second);
-             LcdMessage(LINE1_START_ADDR, au8Time);
-           }
-      }
+    
+    // Turn buzzer off 
+    PWMAudioOff(BUZZER1);
+    
+    // Button 0 for HOURS
+    if (IsButtonPressed(BUTTON0))
+    {
+        ButtonAcknowledge(BUTTON0);
+        LedOn(WHITE);
+        LedOff(GREEN);
+        if(u16Counter % 6 == 0) u8Hour++;
+        if (u8Hour > 23)
+        {
+            u8Hour = 0;
+        }
+        UpdateTime(au8Time, u8Hour, u8Minute, u8Second);
+        LcdMessage(LINE1_START_ADDR, au8Time);
+        Delay(100);
+    } else {
+        LedOff(WHITE);
     }
+    
 
+    // Button 1 for MINUTES
+    if (IsButtonPressed(BUTTON1))
+    {
+        ButtonAcknowledge(BUTTON1);
+        LedOn(PURPLE);
+        LedOff(GREEN);
+        if(u16Counter % 6 == 0) u8Minute++;
+        if (u8Minute > 59)
+        {
+            u8Minute = 0;
+        }
+        UpdateTime(au8Time, u8Hour, u8Minute, u8Second);
+        LcdMessage(LINE1_START_ADDR, au8Time);
+        Delay(100);
+    } else {
+        LedOff(PURPLE);
+    }
+    
+    // Button 2 for SECONDS
+    if (IsButtonPressed(BUTTON2))
+    {
+        ButtonAcknowledge(BUTTON2);
+        if(u16Counter % 6 == 0) u8Second = u8Second + 10;
+        LedOn(BLUE);
+        LedOff(GREEN);
+        if (u8Second > 59)
+        {
+            u8Second = 0;
+        }
+        UpdateTime(au8Time, u8Hour, u8Minute, u8Second);
+        LcdMessage(LINE1_START_ADDR, au8Time);
+        Delay(100);
+    } else {
+        LedOff(BLUE);
+    }
+    
+    
+    
+    // Handle Button3 to start the countdown
+    if(IsButtonPressed(BUTTON3))
+    {
+        ButtonAcknowledge(BUTTON3);
+        bIsCountingDown = TRUE;
+    }
+    
+    
+    if(u16Counter == U16_COUNTER_PERIOD_MS){
+        u16Counter = 0;
+        if(bLightIsOn){
+            HEARTBEAT_OFF();
+            bLightIsOn = FALSE;
+        }
+        else {
+            // HEARTBEAT_ON();
+            bLightIsOn = TRUE;
+            if(bIsCountingDown){
+                HEARTBEAT_ON();
+                
+                // Update the countdown values
+                if (u8Second > 0)
+                    u8Second--;
+                else if (u8Minute > 0)
+                {
+                    u8Minute--;
+                    u8Second = 59;
+                }
+                else if (u8Hour > 0)
+                {
+                    u8Hour--;
+                    u8Minute = 59;
+                    u8Second = 59;
+                }
+                UpdateTime(au8Time, u8Hour, u8Minute, u8Second);
+                LcdMessage(LINE1_START_ADDR, au8Time);
+            }
+        }
+    }
+    
     // Countdown completed, reset the flag
     if(bIsCountingDown == TRUE && u8Hour == 0 && u8Minute == 0 && u8Second == 0){
-      bIsCountingDown = FALSE;
-      LcdMessage(LINE1_START_ADDR, "   *****DONE!*****       ");
-      LedOn(GREEN);
-      HEARTBEAT_OFF();
+        bIsCountingDown = FALSE;
+        LcdMessage(LINE1_START_ADDR, "   *****DONE!*****       ");
+        LedOn(GREEN);
+        HEARTBEAT_OFF();
+        
+        // Sound the buzzer 
+        PlayKitchenBuzzer();
+
     }
 }
 
@@ -307,7 +331,7 @@ static void UserApp1SM_Idle(void)
 /* Handle an error */
 static void UserApp1SM_Error(void)          
 {
-  
+    
 } /* end UserApp1SM_Error() */
 
 
