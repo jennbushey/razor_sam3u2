@@ -327,7 +327,7 @@ void LedInitialize(void)
   /* Initialize the LED control array */
   for(u8 i = 0; i < U8_TOTAL_LEDS; i++)
   {
-    LedPWM( (LedNameType)i, LED_PWM_100);
+    LedPWM( (LedNameType)i, LED_PWM_5);
   }
   
   /* Fade the LEDS out */

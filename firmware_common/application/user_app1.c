@@ -196,6 +196,8 @@ void PlayKitchenBuzzer(void)
     PWMAudioOn(BUZZER1);
     Delay(DURATION_KITCHEN_BUZZER);
     PWMAudioOff(BUZZER1);
+    Delay(DURATION_KITCHEN_BUZZER);
+    LedOff(GREEN);
 }
 
 
@@ -209,7 +211,6 @@ static void UserApp1SM_Idle(void)
     static u16 u16Counter = 0;
     static bool bLightIsOn = FALSE;  // Variable to hold the heartbeat
     
-   
     // Keep track of the loop
     u16Counter++;
     
@@ -322,8 +323,8 @@ static void UserApp1SM_Idle(void)
         
         // Sound the buzzer 
         PlayKitchenBuzzer();
-
-    }
+        
+        }
 }
 
 
